@@ -18,6 +18,21 @@ mongoose.connect(dbUrl, {useUnifiedTopology: true}, err => {
     }
 })
 
+function verifyToken(req, res, next) {
+    if(!req.headers.authorization) {
+        return res.status(401).send("Unauthorized request");
+    }
+    let token = req.headers.authorization.split(' ')[1];
+    if(token === 'null') {
+        return res.status(401).send("Unauthorized request");
+    }
+    jwt.verify(token, process.env.jwtKey, function(err, decoded) {
+        if(err) {
+            return res.status(401).send("Unauthorized request");
+        }
+    })
+    next();
+}
 
 router.get('/', (req, res)=> {
     res.send('route rendered..')
@@ -43,16 +58,13 @@ User.findOne({email: userData.email}, (error, user)=>{
     if(error){
         console.log(error);
     }else {
-        console.log(user)
-        console.log(process.env.algorithm)
         const hashedPassword = bcrypt.hashSync(userData.password, 8)
-        console.log(hashedPassword)
         if(!user || !bcrypt.compareSync(userData.password, user.password)){
             res.status(401).send("Invalid credentials.");
         }else{
             const token = jwt.sign({email:user.email} , process.env.jwtKey, {
-                algorithm: process.env.algorithm,
-                expiresIn: process.env.jwtExpirySeconds
+                algorithm: process.env.algorithm
+                //,expiresIn: process.env.jwtExpirySeconds
               })
             res.status(200).send({token:token});
         }
@@ -97,7 +109,7 @@ router.get('/events', (req, res) => {
 })
 
 
-router.get('/special-events', (req, res) => {
+router.get('/special-events', verifyToken, (req, res) => {
     let events = [
             {
                 "_id": "1",
