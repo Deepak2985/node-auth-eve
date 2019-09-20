@@ -5,12 +5,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const User = require('../models/user');
 
-
-const dbUrl = "mongodb://testuser:testuser123@ds151024.mlab.com:51024/eventsauth";
-const jwtKey = 'my_secret_key'
-const jwtExpirySeconds = 300
-
-mongoose.connect(dbUrl, {useUnifiedTopology: true}, err => {
+mongoose.connect(process.env.dbUrl, {useUnifiedTopology: true}, err => {
     if(err){
         console.log(err);
     }else{
