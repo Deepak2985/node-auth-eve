@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const mongoose = require('mongoose');
+const sendGrid = require('@sendgrid/mail');
+sendGrid.setApiKey(process.env.emailApiKey);
+
 const User = require('../models/user');
 
 mongoose.connect(process.env.dbUrl, {useUnifiedTopology: true}, err => {
@@ -42,6 +45,16 @@ router.post('/register', (req, res)=>{
         if(error){
             console.log(error);
         }else{
+            sendGrid.send({
+                to: registeredUser.email,
+                from: 'welcome@auth.com',
+                subject:'Its great to have you in our auth app',
+                text: 'Thank you for registering with us.',
+                html: `<h3>Dear ${registeredUser.name}</h3>
+                <p> Thank your for registering with us... </p>
+                <h3>Cheers!</h3>
+                <h3>Auth Team</h3>`
+            })
             res.status(200).send({name:registeredUser.name, email:registeredUser.email});
         }
     })
