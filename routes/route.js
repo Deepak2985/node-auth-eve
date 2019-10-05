@@ -45,7 +45,8 @@ router.post('/register', (req, res)=>{
         if(error){
             console.log(error);
         }else{
-            sendGrid.send({
+         console.log(process.env.emailApiKey);
+         const mailStatus =   sendGrid.send({
                 to: registeredUser.email,
                 from: 'welcome@auth.com',
                 subject:'Its great to have you in our auth app',
@@ -55,6 +56,7 @@ router.post('/register', (req, res)=>{
                 <h3>Cheers!</h3>
                 <h3>Auth Team</h3>`
             })
+         console.log(mailStatus);
             res.status(200).send({name:registeredUser.name, email:registeredUser.email});
         }
     })
